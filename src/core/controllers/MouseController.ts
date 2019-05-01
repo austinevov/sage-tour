@@ -36,7 +36,7 @@ export default class MouseController {
     this._rotateStart = new THREE.Vector2(0, 0);
     this._rotateEnd = new THREE.Vector2(0, 0);
     this._rotateDelta = new THREE.Vector2(0, 0);
-    this._rotationSpeed = 0.25;
+    this._rotationSpeed = 0.5;
     this._canvas = canvas;
     this._onRotation = onRotation;
     this._onZoom = onZoom;

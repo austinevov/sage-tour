@@ -17,6 +17,8 @@ import * as Event from '../constants/events';
 import Camera from './camera/Camera';
 import Minimap from './Minimap';
 import clamp from '../utils/clamp';
+import KeyboardController from './controllers/KeyboardController';
+import LabelContainer from './labels/LabelContainer';
 
 export interface SageTourOpts {
   imagePathRoot: string;
@@ -41,6 +43,7 @@ export default class SageTourInternal {
   private _originTime: number;
   private _tourController: TourController;
   private _mouseController: MouseController;
+  private _keyboardController: KeyboardController;
   private _picker: MousePicker;
   private _hooks: { [event: string]: (any) => void };
   private _enableControls: boolean;
@@ -48,6 +51,7 @@ export default class SageTourInternal {
   private _initialized: boolean;
   private _loopHandle: number;
   private _lock: boolean;
+  private _labelContainer: LabelContainer;
 
   constructor(
     container: HTMLDivElement,
@@ -60,6 +64,7 @@ export default class SageTourInternal {
     this._canvas = document.createElement('canvas');
     this._canvas.setAttribute('class', 'sage-tour--canvas');
     this._container.appendChild(this._canvas);
+    this._labelContainer = new LabelContainer(this._container);
     this._initialized = false;
 
     const yaw: number = opts.initialYawDegrees || 0;
@@ -73,6 +78,12 @@ export default class SageTourInternal {
     this._tourController = new TourController();
 
     this._mouseController = new MouseController(
+      this._canvas,
+      this.onRotation,
+      this.onZoom
+    );
+
+    this._keyboardController = new KeyboardController(
       this._canvas,
       this.onRotation,
       this.onZoom
@@ -269,8 +280,13 @@ export default class SageTourInternal {
   };
 
   private onWindowResize = (): void => {
-    const width = this._canvas.clientWidth;
-    const height = this._canvas.clientHeight;
+    const width = this._container.clientWidth;
+    const height = this._container.clientHeight;
+
+    this._canvas.width = width;
+    this._canvas.height = height;
+    this._canvas.style.width = `${width}px`;
+    this._canvas.style.height = `${height}px`;
 
     this._scene.resize(width, height);
     this._sceneRenderer.resize(width, height);

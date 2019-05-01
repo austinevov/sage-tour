@@ -19,21 +19,36 @@ export default class WaypointView {
   private isHovering: boolean;
   private opacity: number;
   private visible: boolean;
-
+  private id: number;
   private shaderUniforms: { [uniform: string]: any };
   private position: THREE.Vector3;
+  private label: string;
 
   private onClicked: () => void;
 
-  constructor(name: string, scene: Scene, onClicked: () => void) {
+  constructor(
+    id: number,
+    label: string,
+    name: string,
+    scene: Scene,
+    onClicked: () => void
+  ) {
+    this.id = id;
     this.isHovering = false;
     this.opacity = MIN_OPACITY;
     this.name = name;
+    this.label = label;
     this.visible = false;
+
+    let color = new THREE.Vector3(255, 215, 0);
+    if (id % 2 === 0) {
+      //      color = new THREE.Vector3(61, 95, 126);
+    }
 
     this.shaderUniforms = {
       u_opacity: { type: 'f', value: this.opacity },
-      u_time: { type: 'f', value: 0.0 }
+      u_time: { type: 'f', value: 0.0 },
+      u_color: new THREE.Uniform(color)
     };
 
     this.onClicked = onClicked;
@@ -89,8 +104,8 @@ export default class WaypointView {
   };
 
   public updateMeshPosition = (position: THREE.Vector3): void => {
-    this.position = position.clone();
-
+    this.position = position.clone(); //.sub(new THREE.Vector3(0, 100, 0));
+    //this.mesh.lookAt(position.clone());
     this.mesh.position.copy(this.position);
     this.collider.position.copy(this.mesh.position);
   };
@@ -100,16 +115,42 @@ export default class WaypointView {
     picker: THREE.Raycaster,
     camera: Camera
   ): void => {
+    // this.mesh.lookAt(
+    //   this.mesh.position.clone().add(new THREE.Vector3(0, 100, 0))
+    // );
     this.mesh.lookAt(camera.position());
     this.collider.lookAt(camera.position());
 
+    const wasHovering = this.isHovering;
     this.isHovering = false;
-
     picker.intersectObject(this.collider).forEach(({ object }) => {
       if (object.name === this.collider.name) {
         this.isHovering = true;
       }
     });
+
+    if (this.isHovering) {
+      const event: CustomEvent = new CustomEvent('start_label_hover', {
+        detail: {
+          id: this.id,
+          camera: camera.camera(),
+          mesh: this.mesh,
+          label: this.label
+        }
+      });
+
+      document.dispatchEvent(event);
+    }
+
+    if (wasHovering && !this.isHovering) {
+      const event: CustomEvent = new CustomEvent('end_label_hover', {
+        detail: {
+          id: this.id
+        }
+      });
+
+      document.dispatchEvent(event);
+    }
 
     const delta = this.isHovering ? 1 : -1;
     const opacity = this.opacity + delta * dt;

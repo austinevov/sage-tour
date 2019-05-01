@@ -91,6 +91,9 @@ export default class Panorama {
     return this._name;
   };
 
+  public getBestTexture = (): number => {
+    return this._lodManager.getBestTexture();
+  };
   public setPosition = (position: THREE.Vector3): void => {
     this._position = position.clone();
     this._position.y = this.floor() * 100;

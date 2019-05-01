@@ -5,13 +5,18 @@ export default class LODManager {
   private lod: LODNode;
 
   constructor(id: number) {
-    this.lod = new LODNode(id, 512, 0);
-    this.lod.next = new LODNode(id, 1024, 1);
+    this.lod = new LODNode(id, 512, 0, 0);
+    this.lod.next = new LODNode(id, 1024, 1, 0);
+    //this.lod.next.next = new LODNode(id, 2048, 2, 1);
+    //this.lod.next = new LODNode(id, 1024, 1);
+    //this.lod = new LODNode(id, 2048, 2);
+    //this.lod = new LODNode(id, 1024, 1);
   }
 
   public initialize = (gl: WebGLRenderingContext): void => {
     this.lod.initialize(gl);
     this.lod.next.initialize(gl);
+    //this.lod.next.next.initialize(gl);
   };
 
   public update = (): void => {
@@ -22,7 +27,7 @@ export default class LODManager {
 
   public buffer = (): void => {
     this.lod.buffer();
-    if (this.lod.next) {
+    if (this.lod.isBuffered() && this.lod.next) {
       this.lod.next.buffer();
     }
   };
@@ -40,6 +45,11 @@ export default class LODManager {
         resolve();
       });
     }
+  };
+
+  public getBestTexture = (): number => {
+    console.log(this.lod.getTextureOffset());
+    return this.lod.getTextureOffset();
   };
 
   public load = (imagePathRoot: string): Promise<any> => {

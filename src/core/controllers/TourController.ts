@@ -9,7 +9,7 @@ import clamp from '../../utils/clamp';
 import Minimap from '../Minimap';
 
 export const MIN_FOV = 10;
-export const MAX_FOV = 75;
+export const MAX_FOV = 90;
 
 export default class TourController {
   private _phi: number;

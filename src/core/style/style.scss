@@ -1,7 +1,58 @@
+@import url('https://fonts.googleapis.com/css?family=Julius+Sans+One');
+
 .sage-tour--canvas {
   width: 100%;
   height: 100%;
 }
+
+.ev-label-container {
+  width: 100%;
+  height: 100%;
+
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  pointer-events: none;
+}
+
+.ev-bubble-label {
+  background-color: rgba(50, 54, 57, 1);
+  height: auto;
+  padding: 10px 10px;
+  transition: all 250ms ease-in-out;
+  user-select: none;
+
+  width: fit-content;
+  position: relative;
+  border-top-right-radius: 16px;
+  border-bottom-right-radius: 16px;
+  border-top-left-radius: 2px;
+  border-bottom-left-radius: 2px;
+  transform: scale(0.01);
+  transform: scale(1.0);
+
+  position: absolute;
+
+  div {
+    position: absolute;
+    left: -19px;
+    top: 0px;
+    width: 0;
+    height: 0;
+    border-top: 19px solid transparent;
+    border-bottom: 19px solid transparent;
+
+    border-right: 19px solid rgba(50, 54, 57, 1);
+  }
+
+  span {
+    display: inline-block;
+    color: white;
+    font-family: 'Julius Sans One', sans-serif;
+    font-weight: 600;
+  }
+}
+
 
 .sage-tour--minimap {
   transition: all 500ms ease-in-out;
@@ -132,6 +183,7 @@
       fill: greenyellow;
     }
   }
+
   .shadow-point {
     fill: black;
     opacity: 0.2;

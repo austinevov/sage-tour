@@ -4,6 +4,7 @@ varying vec2 v_uv;
 
 uniform float u_opacity;
 uniform float u_time;
+uniform vec3 u_color;
 
 void main()	
 {
@@ -22,12 +23,12 @@ void main()
   float brightness = smoothstep(or, or-aaf, d);
   brightness -= smoothstep(ir, ir-aaf, d);
 
-  vec3 col = vec3(brightness);
+  vec3 col = u_color / 255.;
 
   float opacity = 0.0;
   if (brightness > 0.0)
   {
-    opacity = u_opacity;
+    opacity = brightness*u_opacity;
   }
 
   gl_FragColor = vec4(col, opacity);

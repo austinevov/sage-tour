@@ -62,6 +62,67 @@ export default class CubeFaceNode extends CubeFace {
           pf
         )
       ];
+    } else if (lod === 2) {
+      this.children = [
+        new CubeFaceLeaf(
+          ordinalMap[baseOrdinal],
+          chunkResolution,
+          face,
+          lod + 1,
+          pf
+        ),
+        new CubeFaceLeaf(
+          ordinalMap[baseOrdinal] + 1,
+          chunkResolution,
+          face,
+          lod + 1,
+          pf
+        ),
+        new CubeFaceLeaf(
+          ordinalMap[baseOrdinal] + chunkDimension,
+          chunkResolution,
+          face,
+          lod + 1,
+          pf
+        ),
+        new CubeFaceLeaf(
+          ordinalMap[baseOrdinal] + chunkDimension + 1,
+          chunkResolution,
+          face,
+          lod + 1,
+          pf
+        )
+      ];
+      // this.children = [
+      //   new CubeFaceLeaf(
+      //     ordinalMap[baseOrdinal],
+      //     chunkResolution,
+      //     face,
+      //     lod + 1,
+      //     pf
+      //   ),
+      //   new CubeFaceLeaf(
+      //     ordinalMap[baseOrdinal] + 1,
+      //     chunkResolution,
+      //     face,
+      //     lod + 1,
+      //     pf
+      //   ),
+      //   new CubeFaceLeaf(
+      //     ordinalMap[baseOrdinal] + chunkDimension,
+      //     chunkResolution,
+      //     face,
+      //     lod + 1,
+      //     pf
+      //   ),
+      //   new CubeFaceLeaf(
+      //     ordinalMap[baseOrdinal] + chunkDimension + 1,
+      //     chunkResolution,
+      //     face,
+      //     lod + 1,
+      //     pf
+      //   )
+      // ];
     }
   }
 

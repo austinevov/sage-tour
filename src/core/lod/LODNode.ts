@@ -6,16 +6,27 @@ export default class LODNode {
   private id: number;
   private baseLOD: number;
   private isLoadStarted: boolean;
-
+  private textureOffset: number;
   next: LODNode;
 
-  constructor(id: number, resolution: number, baseLOD: number) {
+  constructor(
+    id: number,
+    resolution: number,
+    baseLOD: number,
+    textureOffset: number
+  ) {
     this.id = id;
     this.resolution = resolution;
     this.baseLOD = baseLOD;
     this.isLoadStarted = false;
+    this.textureOffset = textureOffset;
 
-    this.texture = new CubeTexture(this.resolution, this.baseLOD, this.id);
+    this.texture = new CubeTexture(
+      this.resolution,
+      this.baseLOD,
+      this.id,
+      textureOffset
+    );
   }
 
   public initialize = (gl: WebGLRenderingContext): void => {
@@ -31,6 +42,10 @@ export default class LODNode {
 
   public bind = (): void => {
     this.texture.bind();
+  };
+
+  public getTextureOffset = (): number => {
+    return this.textureOffset;
   };
 
   public buffer = (): void => {

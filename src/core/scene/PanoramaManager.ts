@@ -32,12 +32,8 @@ export default class PanoramaManager {
 
     //First pass: build out panoramas
     panoramaGraph.forEach((node: PanoramaGraphNode) => {
-      const panorama = new Panorama(
-        node.id,
-        node.floor,
-        node.name,
-        new THREE.Vector3().fromArray(node.position)
-      );
+      let position = new THREE.Vector3().fromArray(node.position);
+      const panorama = new Panorama(node.id, node.floor, node.name, position);
       panoramas[node.id] = panorama;
     });
 

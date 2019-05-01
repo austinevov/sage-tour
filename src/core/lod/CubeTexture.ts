@@ -27,11 +27,18 @@ export default class CubeTexture {
   private baseLOD: number;
   private resolution: number;
   private isMipped: boolean;
+  private textureOffset: number;
 
-  constructor(resolution: number, lod: number, id: number) {
+  constructor(
+    resolution: number,
+    lod: number,
+    id: number,
+    textureOffset: number
+  ) {
     this.resolution = resolution;
     this.baseLOD = lod;
     this.isMipped = false;
+    this.textureOffset = textureOffset;
 
     const pf: PathFinder = (ordinal, lod) => `${ordinal}-${lod}-${id}`;
     if (lod === 0) {
@@ -54,6 +61,13 @@ export default class CubeTexture {
       this.nx = new CubeFaceNodeSplitter(lod, 0, 'nx', 4, 512, pf, 1024);
       this.ny = new CubeFaceNodeSplitter(lod, 0, 'ny', 4, 512, pf, 1024);
       this.nz = new CubeFaceNodeSplitter(lod, 0, 'nz', 4, 512, pf, 1024);
+    } else if (lod === 2) {
+      this.px = new CubeFaceNodeSplitter(lod, 0, 'px', 4, 512, pf, 2048);
+      this.py = new CubeFaceNodeSplitter(lod, 0, 'py', 4, 512, pf, 2048);
+      this.pz = new CubeFaceNodeSplitter(lod, 0, 'pz', 4, 512, pf, 2048);
+      this.nx = new CubeFaceNodeSplitter(lod, 0, 'nx', 4, 512, pf, 2048);
+      this.ny = new CubeFaceNodeSplitter(lod, 0, 'ny', 4, 512, pf, 2048);
+      this.nz = new CubeFaceNodeSplitter(lod, 0, 'nz', 4, 512, pf, 2048);
     }
   }
 
@@ -74,7 +88,7 @@ export default class CubeTexture {
   };
 
   public bind = (): void => {
-    this.gl.activeTexture(this.gl.TEXTURE0);
+    this.gl.activeTexture(this.gl.TEXTURE0 + this.textureOffset);
     this.gl.bindTexture(this.gl.TEXTURE_CUBE_MAP, this.texture);
   };
 
@@ -109,21 +123,20 @@ export default class CubeTexture {
     const gl: WebGLRenderingContext = this.gl;
 
     this.texture = gl.createTexture();
-    this.gl.activeTexture(this.gl.TEXTURE0);
+    this.gl.activeTexture(this.gl.TEXTURE0 + this.textureOffset);
     gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.texture);
-    const rawData = new Uint8Array(this.resolution * this.resolution * 3);
 
     FaceTypes.forEach(face => {
       gl.texImage2D(
         face,
         0,
-        gl.RGB,
+        gl.RGBA,
         this.resolution,
         this.resolution,
         0,
-        gl.RGB,
+        gl.RGBA,
         gl.UNSIGNED_BYTE,
-        rawData
+        undefined
       );
     });
   };

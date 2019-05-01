@@ -27,7 +27,7 @@ module.exports = ({
         libraryExport: 'default'
       },
       devServer: {
-        contentBase: path.join(__dirname, 'public'),
+        contentBase: path.join(__dirname, 'example'),
         historyApiFallback: true
       },
       devtool: 'source-map',

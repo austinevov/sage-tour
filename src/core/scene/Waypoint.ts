@@ -13,6 +13,8 @@ export default class Waypoint {
   constructor(panorama: Panorama, scene: Scene) {
     this._panorama = panorama;
     this._view = new WaypointView(
+      this._panorama.id(),
+      this._panorama.name(),
       `waypoint-${this._panorama.id()}`,
       scene,
       () => {
