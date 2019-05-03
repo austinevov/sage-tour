@@ -9,7 +9,7 @@ export default class Panorama {
   private _edges: Panorama[];
   private _lodManager: LODManager;
   private _thetaOffset: number;
-  private _hdTexture: THREE.Texture;
+  private _hdTexture: HTMLImageElement;
   private _isHDLoaded: boolean;
 
   constructor(
@@ -65,20 +65,25 @@ export default class Panorama {
   public loadHD = (imagePathRoot: string, anisotropy: number): void => {
     if (!this._isHDLoaded) {
       const path = `${imagePathRoot}/panorama_source/${this._id}.jpeg`;
-
-      this._hdTexture = new THREE.TextureLoader().load(path, texture => {
-        this._hdTexture = texture;
-        this._hdTexture.anisotropy = anisotropy;
-        this._hdTexture.minFilter = THREE.LinearFilter;
-        this._hdTexture.magFilter = THREE.LinearMipMapLinearFilter;
-        (this._hdTexture as any).thePath = path;
-
+      this._hdTexture = new Image();
+      this._hdTexture.crossOrigin = 'anonymous';
+      this._hdTexture.onload = () => {
         this._isHDLoaded = true;
-      });
+      };
+      this._hdTexture.src = path;
+      // this._hdTexture = new THREE.TextureLoader().load(path, texture => {
+      //   this._hdTexture = texture;
+      //   this._hdTexture.anisotropy = anisotropy;
+      //   this._hdTexture.minFilter = THREE.LinearFilter;
+      //   this._hdTexture.magFilter = THREE.LinearMipMapLinearFilter;
+      //   (this._hdTexture as any).thePath = path;
+
+      //   this._isHDLoaded = true;
+      // });
     }
   };
 
-  public getHDTexture = (): THREE.Texture => {
+  public getHDTexture = (): HTMLImageElement => {
     return this._hdTexture;
   };
 

@@ -8548,14 +8548,12 @@ class Panorama {
         this.loadHD = (imagePathRoot, anisotropy) => {
             if (!this._isHDLoaded) {
                 const path = `${imagePathRoot}/panorama_source/${this._id}.jpeg`;
-                this._hdTexture = new three__WEBPACK_IMPORTED_MODULE_0__["TextureLoader"]().load(path, texture => {
-                    this._hdTexture = texture;
-                    this._hdTexture.anisotropy = anisotropy;
-                    this._hdTexture.minFilter = three__WEBPACK_IMPORTED_MODULE_0__["LinearFilter"];
-                    this._hdTexture.magFilter = three__WEBPACK_IMPORTED_MODULE_0__["LinearMipMapLinearFilter"];
-                    this._hdTexture.thePath = path;
+                this._hdTexture = new Image();
+                this._hdTexture.crossOrigin = 'anonymous';
+                this._hdTexture.onload = () => {
                     this._isHDLoaded = true;
-                });
+                };
+                this._hdTexture.src = path;
             }
         };
         this.getHDTexture = () => {
@@ -9251,7 +9249,11 @@ class Scene {
         };
         this.showHDTexture = (hdTexture) => {
             this._spinner.show();
-            this._mesh.material.map = hdTexture;
+            const texture = new three__WEBPACK_IMPORTED_MODULE_0__["Texture"](hdTexture);
+            texture.anisotropy = this._anisotropy;
+            texture.minFilter = three__WEBPACK_IMPORTED_MODULE_0__["LinearFilter"];
+            texture.magFilter = three__WEBPACK_IMPORTED_MODULE_0__["LinearMipMapLinearFilter"];
+            this._mesh.material.map = texture;
             this._mesh.material.map.needsUpdate = true;
             this._mesh.material.needsUpdate = true;
             this._mesh.visible = true;

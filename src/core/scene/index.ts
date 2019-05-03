@@ -141,9 +141,14 @@ export default class Scene {
     this.setVisibilityForPanorama(this._panoramaManager.activePanorama());
   };
 
-  public showHDTexture = (hdTexture: THREE.Texture): void => {
+  public showHDTexture = (hdTexture: HTMLImageElement): void => {
     this._spinner.show();
-    (this._mesh.material as any).map = hdTexture;
+    const texture: THREE.Texture = new THREE.Texture(hdTexture);
+    texture.anisotropy = this._anisotropy;
+    texture.minFilter = THREE.LinearFilter;
+    texture.magFilter = THREE.LinearMipMapLinearFilter;
+
+    (this._mesh.material as any).map = texture;
     (this._mesh.material as any).map.needsUpdate = true;
     (this._mesh.material as any).needsUpdate = true;
 
