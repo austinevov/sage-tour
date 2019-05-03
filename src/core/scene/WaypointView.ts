@@ -40,7 +40,7 @@ export default class WaypointView {
     this.label = label;
     this.visible = false;
 
-    let color = new THREE.Vector3(255, 215, 0);
+    let color = new THREE.Vector3(50, 54, 57);
     if (id % 2 === 0) {
       //      color = new THREE.Vector3(61, 95, 126);
     }
@@ -174,5 +174,20 @@ export default class WaypointView {
 
     this.geometry.dispose();
     this.material.dispose();
+  };
+
+  public isVisible = (): boolean => {
+    return this.visible;
+  };
+
+  public getMeshWorldPosition = (): THREE.Vector3 => {
+    let position = new THREE.Vector3();
+    this.mesh.getWorldPosition(position);
+
+    return position.clone();
+  };
+
+  public getLabel = (): string => {
+    return this.label;
   };
 }

@@ -12,7 +12,7 @@ export default class Camera {
   private _theta: number;
 
   constructor(aspect: number) {
-    this._fov = MAX_FOV;
+    this._fov = 90;
     this._position = new THREE.Vector3(0, 0, 0);
     this._camera = new THREE.PerspectiveCamera(this._fov, aspect, 0.01, 1000);
     this._target = new THREE.Vector3(0, 0, 0);
@@ -36,6 +36,10 @@ export default class Camera {
     this._position = position.clone();
     this._camera.position.copy(this._position);
     this.setTarget(this._phi, this._theta);
+  };
+
+  public getFov = (): number => {
+    return this._fov;
   };
 
   public setTarget = (phi: number, theta: number): void => {

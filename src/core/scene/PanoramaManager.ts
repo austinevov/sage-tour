@@ -10,13 +10,16 @@ export default class PanoramaManager {
   private _rootId: number;
   private _imagePathRoot: string;
   private _active: Panorama;
+  private _anisotopy: number;
 
   constructor(
     panoramaGraph: PanoramaGraphNode[],
     rootId: number,
-    imagePathRoot: string
+    imagePathRoot: string,
+    anisotropy: number
   ) {
     this._rootId = rootId;
+    this._anisotopy = anisotropy;
     this._imagePathRoot = imagePathRoot;
     this.initializeGraph(panoramaGraph);
   }
@@ -84,7 +87,11 @@ export default class PanoramaManager {
     }
 
     this._active = panorama;
-    this._active.load(this._imagePathRoot);
+    this._active.load(this._imagePathRoot).then(() => {
+      setTimeout(() => {
+        this._active.loadHD(this._imagePathRoot, this._anisotopy);
+      }, 500);
+    });
 
     camera.setPosition(this._active.position());
   };

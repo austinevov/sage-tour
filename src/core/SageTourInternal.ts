@@ -19,6 +19,8 @@ import Minimap from './Minimap';
 import clamp from '../utils/clamp';
 import KeyboardController from './controllers/KeyboardController';
 import LabelContainer from './labels/LabelContainer';
+import DisplayBar from './DisplayBar';
+import Spinner from './Spinner';
 
 export interface SageTourOpts {
   imagePathRoot: string;
@@ -52,21 +54,43 @@ export default class SageTourInternal {
   private _loopHandle: number;
   private _lock: boolean;
   private _labelContainer: LabelContainer;
+  private _name: string;
+  private _displayBar: DisplayBar;
+  private _spinner: Spinner;
 
   constructor(
     container: HTMLDivElement,
     panoramaGraph: PanoramaGraphNode[],
     onLoad: () => void,
-    opts: SageTourOpts
+    opts: SageTourOpts,
+    name: string = 'untitled'
   ) {
     this._container = container;
     this._container.style.position = 'relative';
     this._canvas = document.createElement('canvas');
     this._canvas.setAttribute('class', 'sage-tour--canvas');
+
     this._container.appendChild(this._canvas);
-    this._labelContainer = new LabelContainer(this._container);
+    this._labelContainer = new LabelContainer(
+      this._container,
+      panoramaGraph.map(p => p.id)
+    );
+    this._spinner = new Spinner(this._container);
+    this._displayBar = new DisplayBar(
+      this._container,
+      name,
+      this.onZoom,
+      toggle => {
+        if (toggle) {
+          this._container.requestFullscreen();
+        } else {
+          document.exitFullscreen();
+        }
+      }
+    );
     this._initialized = false;
 
+    this._name = name;
     const yaw: number = opts.initialYawDegrees || 0;
     const pitch: number = opts.initialPitchDegrees || Math.PI / 2;
     const root: number = opts.rootId || panoramaGraph[0].id;
@@ -97,9 +121,17 @@ export default class SageTourInternal {
       this.onFloorChange(evt.detail.floor);
     });
 
-    this._sceneRenderer = new SceneRenderer(this._canvas);
+    this._sceneRenderer = new SceneRenderer(this._canvas, this._labelContainer);
 
-    this._scene = new Scene(panoramaGraph, root, imagePathRoot, this._canvas);
+    this._scene = new Scene(
+      panoramaGraph,
+      root,
+      imagePathRoot,
+      this._canvas,
+      this._sceneRenderer.getAnisotropy(),
+      this._spinner
+    );
+
     document.addEventListener(LOAD, () => {
       if (!this._initialized) {
         this._initialized = true;

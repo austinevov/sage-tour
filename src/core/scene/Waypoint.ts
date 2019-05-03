@@ -38,6 +38,10 @@ export default class Waypoint {
     this._view.setVisible(visible);
   };
 
+  public isVisible = (): boolean => {
+    return this._view.isVisible();
+  };
+
   public update = (
     dt: number,
     picker: THREE.Raycaster,
@@ -56,4 +60,12 @@ export default class Waypoint {
   public markForDeletion() {
     this.setVisible(false);
   }
+
+  public getMeshWorldPosition = (): THREE.Vector3 => {
+    return this._view.getMeshWorldPosition();
+  };
+
+  public getLabel = (): string => {
+    return this._view.getLabel();
+  };
 }

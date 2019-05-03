@@ -66,7 +66,7 @@ export default class PanoramaRenderer {
       'u_projection',
       camera.camera().projectionMatrix
     );
-    this.program.setUniformI('u_cubemap', 0);
+    this.program.setUniformI('u_cubemap', 5);
     this.cube.bind(this.program);
 
     activePanorama.buffer();

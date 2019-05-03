@@ -66,28 +66,28 @@ export default class CubeFaceNode extends CubeFace {
       this.children = [
         new CubeFaceLeaf(
           ordinalMap[baseOrdinal],
-          chunkResolution,
+          chunkResolution / 2,
           face,
           lod + 1,
           pf
         ),
         new CubeFaceLeaf(
           ordinalMap[baseOrdinal] + 1,
-          chunkResolution,
+          chunkResolution / 2,
           face,
           lod + 1,
           pf
         ),
         new CubeFaceLeaf(
           ordinalMap[baseOrdinal] + chunkDimension,
-          chunkResolution,
+          chunkResolution / 2,
           face,
           lod + 1,
           pf
         ),
         new CubeFaceLeaf(
           ordinalMap[baseOrdinal] + chunkDimension + 1,
-          chunkResolution,
+          chunkResolution / 2,
           face,
           lod + 1,
           pf

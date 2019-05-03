@@ -97,7 +97,7 @@ export default class TransitionRenderer {
       'u_projection',
       camera.camera().projectionMatrix
     );
-    this.program.setUniformI('u_cubemap', 0);
+    this.program.setUniformI('u_cubemap', 5);
     this.cube.bind(this.program);
 
     this.track.getSourcePanorama().buffer();
@@ -113,7 +113,7 @@ export default class TransitionRenderer {
       'u_projection',
       camera.camera().projectionMatrix
     );
-    this.program.setUniformI('u_cubemap', 0);
+    this.program.setUniformI('u_cubemap', 5);
     this.cube.bind(this.program);
 
     this.track.getDestinationPanorama().buffer();

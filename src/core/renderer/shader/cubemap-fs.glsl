@@ -20,7 +20,7 @@ void main()
         count += 1.0;
       }
     }
-  }
+   }
 
   col /= count;
 

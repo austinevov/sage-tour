@@ -42,9 +42,7 @@ export default class CubeFaceLeaf extends CubeFace {
     this.face = face;
     this.chunkResolution = chunkResolution;
     this.size = Math.pow(2, lod);
-    if (lod === 3) {
-      this.size = 4;
-    }
+
     this.lod = lod;
     this.isBuffered = false;
   }
@@ -74,16 +72,18 @@ export default class CubeFaceLeaf extends CubeFace {
       const x = this.ordinal - y * this.size;
       const w = x * this.chunkResolution;
       const h = y * this.chunkResolution;
-      console.log('wh', w, h);
+
+      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 0);
       gl.texSubImage2D(
         FaceLUT[this.face],
         0,
         w,
         h,
-        gl.RGBA,
+        gl.RGB,
         gl.UNSIGNED_BYTE,
         this.image.image
       );
+      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
 
       this.isBuffered = true;
     }

@@ -62,12 +62,12 @@ export default class CubeTexture {
       this.ny = new CubeFaceNodeSplitter(lod, 0, 'ny', 4, 512, pf, 1024);
       this.nz = new CubeFaceNodeSplitter(lod, 0, 'nz', 4, 512, pf, 1024);
     } else if (lod === 2) {
-      this.px = new CubeFaceNodeSplitter(lod, 0, 'px', 4, 512, pf, 2048);
-      this.py = new CubeFaceNodeSplitter(lod, 0, 'py', 4, 512, pf, 2048);
-      this.pz = new CubeFaceNodeSplitter(lod, 0, 'pz', 4, 512, pf, 2048);
-      this.nx = new CubeFaceNodeSplitter(lod, 0, 'nx', 4, 512, pf, 2048);
-      this.ny = new CubeFaceNodeSplitter(lod, 0, 'ny', 4, 512, pf, 2048);
-      this.nz = new CubeFaceNodeSplitter(lod, 0, 'nz', 4, 512, pf, 2048);
+      this.px = new CubeFaceNodeSplitter(lod, 0, 'px', 4, 1024, pf, 2048);
+      this.py = new CubeFaceNodeSplitter(lod, 0, 'py', 4, 1024, pf, 2048);
+      this.pz = new CubeFaceNodeSplitter(lod, 0, 'pz', 4, 1024, pf, 2048);
+      this.nx = new CubeFaceNodeSplitter(lod, 0, 'nx', 4, 1024, pf, 2048);
+      this.ny = new CubeFaceNodeSplitter(lod, 0, 'ny', 4, 1024, pf, 2048);
+      this.nz = new CubeFaceNodeSplitter(lod, 0, 'nz', 4, 1024, pf, 2048);
     }
   }
 
@@ -130,11 +130,11 @@ export default class CubeTexture {
       gl.texImage2D(
         face,
         0,
-        gl.RGBA,
+        gl.RGB,
         this.resolution,
         this.resolution,
         0,
-        gl.RGBA,
+        gl.RGB,
         gl.UNSIGNED_BYTE,
         undefined
       );

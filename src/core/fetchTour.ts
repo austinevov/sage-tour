@@ -11,6 +11,7 @@ export interface TourData {
   token: string;
   viewBoxX: number;
   viewBoxY: number;
+  name: string;
 }
 
 function rotateVector(input: number[], theta: number): number[] {
@@ -38,6 +39,8 @@ export default (tourToken: string): Promise<TourData> => {
           };
         });
 
+        const name = response.data.name;
+
         const fpByFloor = (floor: number) => {
           return floorplans.filter(fp => fp.floor === floor)[0];
         };
@@ -46,7 +49,6 @@ export default (tourToken: string): Promise<TourData> => {
           panorama => {
             const floor = parseInt(panorama.floor);
             const theta = fpByFloor(floor).theta;
-            console.log('THETA:', theta);
             const id = parseInt(panorama.id);
 
             const [vx, vy] = rotateVector(
@@ -81,7 +83,8 @@ export default (tourToken: string): Promise<TourData> => {
           floorplans,
           token: tourToken,
           viewBoxX,
-          viewBoxY
+          viewBoxY,
+          name
         });
       });
   });

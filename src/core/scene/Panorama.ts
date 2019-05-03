@@ -9,6 +9,8 @@ export default class Panorama {
   private _edges: Panorama[];
   private _lodManager: LODManager;
   private _thetaOffset: number;
+  private _hdTexture: THREE.Texture;
+  private _isHDLoaded: boolean;
 
   constructor(
     id: number,
@@ -23,6 +25,7 @@ export default class Panorama {
     this._edges = [];
     this._thetaOffset = 0;
     this._lodManager = new LODManager(this._id);
+    this._isHDLoaded = false;
   }
 
   public addEdge = (edge: Panorama): void => {
@@ -59,6 +62,30 @@ export default class Panorama {
     return this._lodManager.load(imagePathRoot);
   };
 
+  public loadHD = (imagePathRoot: string, anisotropy: number): void => {
+    if (!this._isHDLoaded) {
+      const path = `${imagePathRoot}/panorama_source/${this._id}.jpeg`;
+
+      this._hdTexture = new THREE.TextureLoader().load(path, texture => {
+        this._hdTexture = texture;
+        this._hdTexture.anisotropy = anisotropy;
+        this._hdTexture.minFilter = THREE.LinearFilter;
+        this._hdTexture.magFilter = THREE.LinearMipMapLinearFilter;
+        (this._hdTexture as any).thePath = path;
+
+        this._isHDLoaded = true;
+      });
+    }
+  };
+
+  public getHDTexture = (): THREE.Texture => {
+    return this._hdTexture;
+  };
+
+  public isHDLoaded = (): boolean => {
+    return this._isHDLoaded;
+  };
+
   public loadNeighbors = (imagePathRoot: string): void => {
     this._edges.forEach(neighbor => {
       neighbor.load(imagePathRoot);
@@ -73,6 +100,10 @@ export default class Panorama {
     return this._edges.map((edge: Panorama) => {
       return edge._id;
     });
+  };
+
+  public edges = (): Panorama[] => {
+    return this._edges;
   };
 
   public id = (): number => {

@@ -3,19 +3,33 @@ import Label from './Label';
 
 export default class LabelContainer {
   private _container: HTMLDivElement;
-  private _label: Label;
+  private _labels: { [id: number]: Label };
   private _hoveredId: number;
 
-  constructor(parent: HTMLDivElement) {
+  constructor(parent: HTMLDivElement, panoramaIds: number[]) {
     this._container = document.createElement('div');
     this._container.className = 'ev-label-container';
     parent.appendChild(this._container);
-    this._label = new Label(this._container);
-    this._hoveredId = undefined;
+    this._labels = {};
 
-    document.addEventListener('start_label_hover', this.onLabelHover);
-    document.addEventListener('end_label_hover', this.endLabelHover);
+    panoramaIds.forEach(id => {
+      this._labels[id] = new Label(parent);
+    });
   }
+
+  public labelById = (id: number): Label => {
+    return this._labels[id];
+  };
+
+  public dimensions = (): number[] => {
+    return [this._container.clientWidth, this._container.clientHeight];
+  };
+
+  public hideAll = (): void => {
+    Object.keys(this._labels).forEach(key => {
+      this._labels[Number(key)].toggleVisibility(false);
+    });
+  };
 
   public onLabelHover = (evt: CustomEvent) => {
     const id: number = evt.detail.id;
@@ -33,17 +47,11 @@ export default class LabelContainer {
     position.y = -(position.y * heightHalf) + heightHalf;
 
     const { x, y } = position;
-    this._label.setPosition(x + 50, y - 20);
-    this._label.setText(label);
-    this._hoveredId = id;
-    this._label.toggleVisibility(true);
   };
 
   public endLabelHover = (evt: CustomEvent) => {
     const { id } = evt.detail;
-    console.log(this._hoveredId);
     if (Number(id) === Number(this._hoveredId)) {
-      this._label.toggleVisibility(false);
       this._hoveredId = undefined;
     }
   };

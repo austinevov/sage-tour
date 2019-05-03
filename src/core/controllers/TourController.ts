@@ -9,7 +9,7 @@ import clamp from '../../utils/clamp';
 import Minimap from '../Minimap';
 
 export const MIN_FOV = 10;
-export const MAX_FOV = 90;
+export const MAX_FOV = 150;
 
 export default class TourController {
   private _phi: number;
@@ -23,7 +23,7 @@ export default class TourController {
   constructor() {
     this._phi = Math.PI / 2;
     this._theta = 1.7 * Math.PI;
-    this._fov = MAX_FOV;
+    this._fov = 90;
     this._isFovDirty = false;
     this._isPanoramaDirty = false;
     this._targetPanoramaId = 0;

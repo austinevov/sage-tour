@@ -1,7 +1,6 @@
 export default class Label {
   private _container: HTMLDivElement;
   private _text: HTMLSpanElement;
-  private _arrow: HTMLDivElement;
 
   constructor(parent: HTMLDivElement) {
     this._container = document.createElement('div');
@@ -9,10 +8,8 @@ export default class Label {
     parent.appendChild(this._container);
 
     this._text = document.createElement('span');
-    this._arrow = document.createElement('div');
 
     this._container.appendChild(this._text);
-    this._container.appendChild(this._arrow);
   }
 
   public toggleVisibility = (state: boolean) => {
@@ -26,9 +23,12 @@ export default class Label {
   public setText = (text: string) => {
     this._text.innerText = text;
   };
-
+  public setFontSizeFromDistance = (distance: number) => {};
   public setPosition = (x: number, y: number) => {
-    this._container.style.left = `${x}px`;
-    this._container.style.top = `${y}px`;
+    const width = this._container.clientWidth;
+    const height = this._container.clientHeight;
+
+    this._container.style.left = `${x - width / 2}px`;
+    this._container.style.top = `${y - height / 2}px`;
   };
 }

@@ -7,28 +7,37 @@ import Camera from '../camera/Camera';
 import Panorama from './Panorama';
 import Waypoint from './Waypoint';
 import MousePicker from '../controllers/MousePicker';
+import Spinner from '../Spinner';
 
 export default class Scene {
   private _panoramaManager: PanoramaManager;
   private _camera: Camera;
   private _scene: THREE.Scene;
   private _waypoints: Waypoint[];
-
+  private _mesh: THREE.Mesh;
+  private _anisotropy: number;
+  private _isShowingHD: boolean;
+  private _spinner: Spinner;
   constructor(
     panoramaGraph: PanoramaGraphNode[],
     root: number,
     imagePathRoot: string,
-    canvas: HTMLCanvasElement
+    canvas: HTMLCanvasElement,
+    anisotropy: number,
+    spinner: Spinner
   ) {
     this._scene = new THREE.Scene();
     this._camera = new Camera(canvas.clientWidth / canvas.clientHeight);
-
+    this._anisotropy = anisotropy;
+    this._spinner = spinner;
     this._panoramaManager = new PanoramaManager(
       panoramaGraph,
       root,
-      imagePathRoot
+      imagePathRoot,
+      anisotropy
     );
 
+    this._isShowingHD = false;
     this._waypoints = [];
   }
 
@@ -46,7 +55,8 @@ export default class Scene {
       this._panoramaManager = new PanoramaManager(
         panoramaGraph,
         root,
-        imagePathRoot
+        imagePathRoot,
+        this._anisotropy
       );
     });
   };
@@ -65,6 +75,17 @@ export default class Scene {
       .map((panorama: Panorama) => {
         return new Waypoint(panorama, this);
       });
+
+    const geometry = new THREE.SphereBufferGeometry(500, 60, 40);
+    geometry.scale(-1, 1, 1);
+
+    const material = new THREE.MeshBasicMaterial({
+      side: THREE.DoubleSide
+    });
+    this._mesh = new THREE.Mesh(geometry, material);
+    this._mesh.visible = false;
+
+    this._scene.add(this._mesh);
   };
 
   public resize = (width: number, height: number): void => {
@@ -75,6 +96,8 @@ export default class Scene {
     this._waypoints.forEach(waypoint => {
       waypoint.update(dt, picker.picker(), this._camera);
     });
+
+    this._mesh.position.copy(this._camera.camera().position);
   };
 
   public scene = (): THREE.Scene => {
@@ -87,6 +110,10 @@ export default class Scene {
 
   public panoramaManager = (): PanoramaManager => {
     return this._panoramaManager;
+  };
+
+  public getWaypoints = (): Waypoint[] => {
+    return this._waypoints;
   };
 
   public updatePanoramaPosition = (
@@ -112,5 +139,28 @@ export default class Scene {
   public activate = (panoramaId: number): void => {
     this._panoramaManager.activate(panoramaId, this._camera);
     this.setVisibilityForPanorama(this._panoramaManager.activePanorama());
+  };
+
+  public showHDTexture = (hdTexture: THREE.Texture): void => {
+    this._spinner.show();
+    (this._mesh.material as any).map = hdTexture;
+    (this._mesh.material as any).map.needsUpdate = true;
+    (this._mesh.material as any).needsUpdate = true;
+
+    this._mesh.visible = true;
+    this._isShowingHD = true;
+
+    setTimeout(() => {
+      this._spinner.hide();
+    }, 1000);
+  };
+
+  public hideHDTexture = (): void => {
+    this._mesh.visible = false;
+    this._isShowingHD = false;
+  };
+
+  public isShowingHD = (): boolean => {
+    return this._isShowingHD;
   };
 }

@@ -48,7 +48,8 @@ export default class SageTour {
         container,
         data.panoramas,
         onLoad,
-        opts
+        opts,
+        data.name
       );
 
       const allFloors = data.floorplans.map(fp => fp.floor).sort();
