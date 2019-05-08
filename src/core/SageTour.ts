@@ -26,6 +26,7 @@ export interface SageTourOpts {
   initialYawDegrees?: number;
   initialPitchDegrees?: number;
   disableControls?: boolean;
+  forceLD?: boolean;
 }
 
 const AcceptedEvents = [
@@ -89,12 +90,17 @@ export default class SageTour {
     }
   };
 
+  public destroyDOM = () => {
+    this._tour.destroyDOM();
+  }
+
   public on = (
     type:
       | Event.ZOOM
       | Event.ROTATION
       | Event.WAYPOINT_CLICKED
-      | Event.CHANGE_FLOOR,
+      | Event.CHANGE_FLOOR
+      | Event.CONTEXT_LOST,
     handler: (any) => void
   ): void => {
     if (this._tour) {

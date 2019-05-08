@@ -4,6 +4,7 @@ import { PanoramaGraphNode } from '../types/index';
 import Panorama from './Panorama';
 import { LOAD } from '../../constants/events';
 import Camera from '../camera/Camera';
+import { FORCE_LD } from '../SageTourInternal';
 
 export default class PanoramaManager {
   private _panoramas: { [id: number]: Panorama };
@@ -88,9 +89,11 @@ export default class PanoramaManager {
 
     this._active = panorama;
     this._active.load(this._imagePathRoot).then(() => {
-      setTimeout(() => {
-        this._active.loadHD(this._imagePathRoot, this._anisotopy);
-      }, 500);
+      if (!FORCE_LD) {
+        setTimeout(() => {
+          this._active.loadHD(this._imagePathRoot, this._anisotopy);
+        }, 500);
+      }
     });
 
     camera.setPosition(this._active.position());

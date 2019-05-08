@@ -21,21 +21,18 @@ import KeyboardController from './controllers/KeyboardController';
 import LabelContainer from './labels/LabelContainer';
 import DisplayBar from './DisplayBar';
 import Spinner from './Spinner';
+import { SageTourOpts } from './SageTour';
 
-export interface SageTourOpts {
-  imagePathRoot: string;
-  rootId?: number;
-  initialYawDegrees?: number;
-  initialPitchDegrees?: number;
-  disableControls?: boolean;
-}
 
 const AcceptedEvents = [
   Event.ROTATION,
   Event.ZOOM,
   Event.WAYPOINT_CLICKED,
-  Event.CHANGE_FLOOR
+  Event.CHANGE_FLOOR, 
+  Event.CONTEXT_LOST
 ];
+
+export let FORCE_LD = false;
 
 export default class SageTourInternal {
   private _container: HTMLDivElement;
@@ -65,11 +62,13 @@ export default class SageTourInternal {
     opts: SageTourOpts,
     name: string = 'untitled'
   ) {
+    FORCE_LD = opts.forceLD;
     this._container = container;
     this._container.style.position = 'relative';
     this._canvas = document.createElement('canvas');
     this._canvas.setAttribute('class', 'sage-tour--canvas');
 
+    this._canvas.addEventListener('webglcontextlost', this.onContextLost, false);
     this._container.appendChild(this._canvas);
     this._labelContainer = new LabelContainer(
       this._container,
@@ -179,12 +178,19 @@ export default class SageTourInternal {
     return this._tourController;
   };
 
+  public destroyDOM = () => {
+    while (this._container.firstChild) {
+      this._container.removeChild(this._container.firstChild);
+    }
+  }
+
   public on = (
     type:
       | Event.ZOOM
       | Event.ROTATION
       | Event.WAYPOINT_CLICKED
-      | Event.CHANGE_FLOOR,
+      | Event.CHANGE_FLOOR
+      | Event.CONTEXT_LOST,
     handler: (any) => void
   ): void => {
     if (AcceptedEvents.indexOf(type) < 0) {
@@ -253,6 +259,12 @@ export default class SageTourInternal {
       }
     }
   };
+
+  private onContextLost = (): void => {
+    if (this._hooks[Event.CONTEXT_LOST]) {
+      this._hooks[Event.CONTEXT_LOST](undefined);
+    }
+  }
 
   private onZoom = (deltaFov: number): void => {
     if (this._enableControls) {

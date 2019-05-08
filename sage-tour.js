@@ -6106,7 +6106,7 @@ function LensFlare(){console.error('THREE.LensFlare has been moved to /examples/
 /*!*********************************!*\
   !*** ./src/constants/events.js ***!
   \*********************************/
-/*! exports provided: LOAD, WAYPOINT_CLICKED, TRANSITION, ROTATION, ZOOM, CHANGE_FLOOR */
+/*! exports provided: LOAD, WAYPOINT_CLICKED, TRANSITION, ROTATION, ZOOM, CHANGE_FLOOR, CONTEXT_LOST */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -6117,12 +6117,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ROTATION", function() { return ROTATION; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ZOOM", function() { return ZOOM; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "CHANGE_FLOOR", function() { return CHANGE_FLOOR; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "CONTEXT_LOST", function() { return CONTEXT_LOST; });
 var LOAD = 'load';
 var WAYPOINT_CLICKED = 'waypoint_clicked';
 var TRANSITION = 'transition';
 var ROTATION = 'rotation';
 var ZOOM = 'zoom';
 var CHANGE_FLOOR = "change_floor";
+var CONTEXT_LOST = 'context_lost';
 
 /***/ }),
 
@@ -6438,6 +6440,9 @@ class SageTour {
                 return this._tour.controller();
             }
         };
+        this.destroyDOM = () => {
+            this._tour.destroyDOM();
+        };
         this.on = (type, handler) => {
             if (this._tour) {
                 return this._tour.on(type, handler);
@@ -6565,11 +6570,12 @@ class SageTour {
 /*!**************************************!*\
   !*** ./src/core/SageTourInternal.ts ***!
   \**************************************/
-/*! exports provided: default */
+/*! exports provided: FORCE_LD, default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "FORCE_LD", function() { return FORCE_LD; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return SageTourInternal; });
 /* harmony import */ var three__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! three */ "./node_modules/three/build/three.module.js");
 /* harmony import */ var _scene_index__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./scene/index */ "./src/core/scene/index.ts");
@@ -6602,8 +6608,10 @@ const AcceptedEvents = [
     _constants_events__WEBPACK_IMPORTED_MODULE_6__["ROTATION"],
     _constants_events__WEBPACK_IMPORTED_MODULE_6__["ZOOM"],
     _constants_events__WEBPACK_IMPORTED_MODULE_6__["WAYPOINT_CLICKED"],
-    _constants_events__WEBPACK_IMPORTED_MODULE_6__["CHANGE_FLOOR"]
+    _constants_events__WEBPACK_IMPORTED_MODULE_6__["CHANGE_FLOOR"],
+    _constants_events__WEBPACK_IMPORTED_MODULE_6__["CONTEXT_LOST"]
 ];
+let FORCE_LD = false;
 class SageTourInternal {
     constructor(container, panoramaGraph, onLoad, opts, name = 'untitled') {
         this.addMinimap = (floorData) => {
@@ -6624,6 +6632,11 @@ class SageTourInternal {
         };
         this.controller = () => {
             return this._tourController;
+        };
+        this.destroyDOM = () => {
+            while (this._container.firstChild) {
+                this._container.removeChild(this._container.firstChild);
+            }
         };
         this.on = (type, handler) => {
             if (AcceptedEvents.indexOf(type) < 0) {
@@ -6679,6 +6692,11 @@ class SageTourInternal {
                 if (this._hooks[_constants_events__WEBPACK_IMPORTED_MODULE_6__["ROTATION"]]) {
                     this._hooks[_constants_events__WEBPACK_IMPORTED_MODULE_6__["ROTATION"]]({ deltaPhi, deltaTheta });
                 }
+            }
+        };
+        this.onContextLost = () => {
+            if (this._hooks[_constants_events__WEBPACK_IMPORTED_MODULE_6__["CONTEXT_LOST"]]) {
+                this._hooks[_constants_events__WEBPACK_IMPORTED_MODULE_6__["CONTEXT_LOST"]](undefined);
             }
         };
         this.onZoom = (deltaFov) => {
@@ -6799,10 +6817,12 @@ class SageTourInternal {
                 this._tourController.setTheta(this.activePanorama().thetaOffset());
             }
         };
+        FORCE_LD = opts.forceLD;
         this._container = container;
         this._container.style.position = 'relative';
         this._canvas = document.createElement('canvas');
         this._canvas.setAttribute('class', 'sage-tour--canvas');
+        this._canvas.addEventListener('webglcontextlost', this.onContextLost, false);
         this._container.appendChild(this._canvas);
         this._labelContainer = new _labels_LabelContainer__WEBPACK_IMPORTED_MODULE_10__["default"](this._container, panoramaGraph.map(p => p.id));
         this._spinner = new _Spinner__WEBPACK_IMPORTED_MODULE_12__["default"](this._container);
@@ -7486,47 +7506,6 @@ function rotateVector(input, theta) {
 
 /***/ }),
 
-/***/ "./src/core/labels/Label.ts":
-/*!**********************************!*\
-  !*** ./src/core/labels/Label.ts ***!
-  \**********************************/
-/*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Label; });
-class Label {
-    constructor(parent) {
-        this.toggleVisibility = (state) => {
-            if (state) {
-                this._container.style.visibility = 'visible';
-            }
-            else {
-                this._container.style.visibility = 'hidden';
-            }
-        };
-        this.setText = (text) => {
-            this._text.innerText = text;
-        };
-        this.setFontSizeFromDistance = (distance) => { };
-        this.setPosition = (x, y) => {
-            const width = this._container.clientWidth;
-            const height = this._container.clientHeight;
-            this._container.style.left = `${x - width / 2}px`;
-            this._container.style.top = `${y - height / 2}px`;
-        };
-        this._container = document.createElement('div');
-        this._container.className = 'ev-bubble-label';
-        parent.appendChild(this._container);
-        this._text = document.createElement('span');
-        this._container.appendChild(this._text);
-    }
-}
-
-
-/***/ }),
-
 /***/ "./src/core/labels/LabelContainer.ts":
 /*!*******************************************!*\
   !*** ./src/core/labels/LabelContainer.ts ***!
@@ -7537,10 +7516,6 @@ class Label {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return LabelContainer; });
-/* harmony import */ var three__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! three */ "./node_modules/three/build/three.module.js");
-/* harmony import */ var _Label__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Label */ "./src/core/labels/Label.ts");
-
-
 class LabelContainer {
     constructor(parent, panoramaIds) {
         this.labelById = (id) => {
@@ -7550,40 +7525,13 @@ class LabelContainer {
             return [this._container.clientWidth, this._container.clientHeight];
         };
         this.hideAll = () => {
-            Object.keys(this._labels).forEach(key => {
-                this._labels[Number(key)].toggleVisibility(false);
-            });
         };
         this.onLabelHover = (evt) => {
-            const id = evt.detail.id;
-            const camera = evt.detail.camera;
-            const mesh = evt.detail.mesh;
-            const label = evt.detail.label;
-            const widthHalf = this._container.clientWidth / 2;
-            const heightHalf = this._container.clientHeight / 2;
-            let position = new three__WEBPACK_IMPORTED_MODULE_0__["Vector3"]();
-            mesh.getWorldPosition(position);
-            position = position.project(camera);
-            position.x = position.x * widthHalf + widthHalf;
-            position.y = -(position.y * heightHalf) + heightHalf;
-            const { x, y } = position;
         };
         this.endLabelHover = (evt) => {
-            const { id } = evt.detail;
-            if (Number(id) === Number(this._hoveredId)) {
-                this._hoveredId = undefined;
-            }
         };
         this.animate = () => {
-            requestAnimationFrame(this.animate);
         };
-        this._container = document.createElement('div');
-        this._container.className = 'ev-label-container';
-        parent.appendChild(this._container);
-        this._labels = {};
-        panoramaIds.forEach(id => {
-            this._labels[id] = new _Label__WEBPACK_IMPORTED_MODULE_1__["default"](parent);
-        });
     }
 }
 
@@ -7600,58 +7548,11 @@ class LabelContainer {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return LabelRenderer; });
-/* harmony import */ var three__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! three */ "./node_modules/three/build/three.module.js");
-
 class LabelRenderer {
     constructor(labelContainer) {
         this.hideAll = () => {
-            if (!this.hidden) {
-                this.labelContainer.hideAll();
-                this.hidden = true;
-            }
         };
         this.render = (scene) => {
-            this.hidden = false;
-            const fov = scene.camera().getFov();
-            const camera = scene.camera().camera();
-            const [width, height] = this.labelContainer.dimensions();
-            scene.getWaypoints().forEach(waypoint => {
-                const label = this.labelContainer.labelById(waypoint.id());
-                if (waypoint.isVisible()) {
-                    let position = waypoint.getMeshWorldPosition();
-                    const widthHalf = width / 2;
-                    const heightHalf = height / 2;
-                    const labelPosition = new three__WEBPACK_IMPORTED_MODULE_0__["Vector3"]()
-                        .copy(position)
-                        .sub(new three__WEBPACK_IMPORTED_MODULE_0__["Vector3"](0, 20, 0));
-                    const cameraDirection = new three__WEBPACK_IMPORTED_MODULE_0__["Vector3"]();
-                    const cameraPosition = new three__WEBPACK_IMPORTED_MODULE_0__["Vector3"]();
-                    camera.getWorldPosition(cameraPosition);
-                    camera.getWorldDirection(cameraDirection);
-                    const waypointDirection = new three__WEBPACK_IMPORTED_MODULE_0__["Vector3"]()
-                        .copy(position)
-                        .sub(cameraPosition)
-                        .normalize();
-                    const angle = three__WEBPACK_IMPORTED_MODULE_0__["Math"].radToDeg(waypointDirection.angleTo(cameraDirection));
-                    const distance = cameraPosition.distanceTo(position);
-                    if (angle < fov) {
-                        position = labelPosition.project(camera);
-                        position.x = position.x * widthHalf + widthHalf;
-                        position.y = -(position.y * heightHalf) + heightHalf;
-                        const { x, y } = position;
-                        label.setPosition(x, y);
-                        label.setText(waypoint.getLabel().replace('_', ' '));
-                        label.setFontSizeFromDistance(distance);
-                        label.toggleVisibility(true);
-                    }
-                    else {
-                        label.toggleVisibility(false);
-                    }
-                }
-                else {
-                    label.toggleVisibility(false);
-                }
-            });
         };
         this.labelContainer = labelContainer;
         this.hidden = false;
@@ -8630,6 +8531,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var three__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! three */ "./node_modules/three/build/three.module.js");
 /* harmony import */ var _Panorama__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Panorama */ "./src/core/scene/Panorama.ts");
 /* harmony import */ var _constants_events__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../constants/events */ "./src/constants/events.js");
+/* harmony import */ var _SageTourInternal__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../SageTourInternal */ "./src/core/SageTourInternal.ts");
+
 
 
 
@@ -8684,9 +8587,11 @@ class PanoramaManager {
             }
             this._active = panorama;
             this._active.load(this._imagePathRoot).then(() => {
-                setTimeout(() => {
-                    this._active.loadHD(this._imagePathRoot, this._anisotopy);
-                }, 500);
+                if (!_SageTourInternal__WEBPACK_IMPORTED_MODULE_3__["FORCE_LD"]) {
+                    setTimeout(() => {
+                        this._active.loadHD(this._imagePathRoot, this._anisotopy);
+                    }, 500);
+                }
             });
             camera.setPosition(this._active.position());
         };

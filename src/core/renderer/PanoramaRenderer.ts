@@ -7,6 +7,7 @@ import * as cubemapVS from './shader/cubemap-vs.glsl';
 import * as cubemapFS from './shader/cubemap-fs.glsl';
 import Camera from '../camera/Camera';
 import Panorama from '../scene/Panorama';
+import { FORCE_LD } from '../SageTourInternal';
 
 export default class PanoramaRenderer {
   private gl: WebGLRenderingContext;
