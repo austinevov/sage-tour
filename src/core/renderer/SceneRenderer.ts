@@ -19,10 +19,20 @@ export default class SceneRenderer {
   private _labelRenderer: LabelRenderer;
   private _mesh: THREE.Mesh;
 
+  private _isHDBuffered: boolean;
+  private _bufferCount: number;
+  private _hdTexture: WebGLTexture;
+  private _isBufferInProgress: boolean;
+  private _forceRender: boolean;
+  private _gl: WebGLRenderingContext;
+
+  private _workCanvas: HTMLCanvasElement;
+  private _workContext: CanvasRenderingContext2D;
+
   constructor(canvas: HTMLCanvasElement, labelContainer: LabelContainer) {
     this._canvas = canvas;
     this._labelRenderer = new LabelRenderer(labelContainer);
-
+    this._isHDBuffered = false;
     this._renderer = new THREE.WebGLRenderer({
       canvas: this._canvas,
       antialias: true
@@ -31,26 +41,113 @@ export default class SceneRenderer {
     this._renderer.autoClearColor = false;
     this._renderer.autoClearDepth = true;
     this._renderer.autoClearStencil = true;
+    this._gl = this._renderer.getContext();
     this._panoramaRenderer = new PanoramaRenderer(this.context(), this._canvas);
     this._transitionRenderer = new TransitionRenderer(
       this.context(),
       this._canvas
     );
-
+    this._hdTexture = this.createHDTexture();
+    this._bufferCount = 0;
+    this._isBufferInProgress = false;
+    this._forceRender = true;
     document.addEventListener(TRANSITION, (event: TransitionEvent) => {
       const { start, finish, camera } = event.detail;
 
       this.transitionTo(finish, start, camera);
     });
+
+    this._workCanvas = document.getElementById(
+      'texture-splitter'
+    ) as HTMLCanvasElement;
+    this._workContext = this._workCanvas.getContext('2d');
   }
 
+  private createHDTexture = (): WebGLTexture => {
+    const gl = this._gl;
+    gl.activeTexture(gl.TEXTURE0);
+    const texture: WebGLTexture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    const level = 0;
+    const internalFormat = gl.RGBA;
+    const width = 8192;
+    const height = 4096;
+    const border = 0;
+    const srcFormat = gl.RGBA;
+    const srcType = gl.UNSIGNED_BYTE;
+    gl.texImage2D(
+      gl.TEXTURE_2D,
+      level,
+      internalFormat,
+      width,
+      height,
+      border,
+      srcFormat,
+      srcType,
+      undefined
+    );
+
+    const ext =
+      gl.getExtension('EXT_texture_filter_anisotropic') ||
+      gl.getExtension('MOZ_EXT_texture_filter_anisotropic') ||
+      gl.getExtension('WEBKIT_EXT_texture_filter_anisotropic');
+    if (ext) {
+      const max = gl.getParameter(ext.MAX_TEXTURE_MAX_ANISOTROPY_EXT);
+      gl.texParameterf(gl.TEXTURE_2D, ext.TEXTURE_MAX_ANISOTROPY_EXT, max);
+    }
+
+    return texture;
+  };
+
+  private clearCanvas = (): void => {
+    this._workContext.fillRect(0, 0, 512, 512);
+  };
+  private writeToCanvasBufferToGPU = (
+    hd: HTMLImageElement,
+    x: number,
+    y: number
+  ): void => {
+    this._workContext.drawImage(hd, x, y, 512, 512, 0, 0, 512, 512);
+
+    const gl = this._gl;
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, this._hdTexture);
+
+    gl.texSubImage2D(
+      gl.TEXTURE_2D,
+      0,
+      x,
+      4096 - y - 512,
+      512,
+      512,
+      gl.RGBA,
+      gl.UNSIGNED_BYTE,
+      new Uint8Array(this._workContext.getImageData(0, 0, 512, 512).data.buffer)
+    );
+    this._isBufferInProgress = false;
+  };
+
+  private bufferHDTexture = (hd: HTMLImageElement): void => {
+    const count = this._bufferCount;
+    if (!this._isBufferInProgress) {
+      this._isBufferInProgress = true;
+
+      const x = (count % 16) * 512;
+      const y = Math.floor(count / 16) * 512;
+
+      this.writeToCanvasBufferToGPU(hd, x, y);
+      this._bufferCount++;
+    }
+  };
+
   public resize = (width: number, height: number) => {
-    this._renderer.setSize(width * 2, height * 2);
+    const scale = 1.6;
+    this._renderer.setSize(width * scale, height * scale);
 
     this._renderer.domElement.style.width = `${width}px`;
     this._renderer.domElement.style.height = `${height}px`;
-    this._renderer.domElement.width = width * 2;
-    this._renderer.domElement.height = height * 2;
+    this._renderer.domElement.width = width * scale;
+    this._renderer.domElement.height = height * scale;
   };
 
   public getAnisotropy = (): number => {
@@ -72,28 +169,46 @@ export default class SceneRenderer {
       this._labelRenderer.hideAll();
       this._transitionRenderer.render(scene.camera());
       scene.hideHDTexture();
+      this._isHDBuffered = false;
+      this._isBufferInProgress = false;
+      this._bufferCount = 0;
     } else {
       const isHDLoaded = scene
         .panoramaManager()
         .activePanorama()
         .isHDLoaded();
-      if (!isHDLoaded) {
-        this._panoramaRenderer.render(
-          scene.camera(),
-          scene.panoramaManager().activePanorama()
-        );
+
+      this._panoramaRenderer.render(
+        scene.camera(),
+        scene.panoramaManager().activePanorama()
+      );
+      if (!this._isHDBuffered) {
         scene.hideHDTexture();
-      } else if (!scene.isShowingHD()) {
-        scene.showHDTexture(
-          scene
-            .panoramaManager()
-            .activePanorama()
-            .getHDTexture()
-        );
+        if (isHDLoaded) {
+          this._forceRender = false;
+          this.bufferHDTexture(
+            scene
+              .panoramaManager()
+              .activePanorama()
+              .getHDTexture()
+          );
+          this._isHDBuffered = this._bufferCount === 128;
+        }
+      } else {
+        const gl = this._gl;
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        scene.showHDTexture(this._renderer, this._hdTexture);
+        this.clearCanvas();
       }
 
       this._renderer.render(scene.scene(), scene.camera().camera());
-      this._labelRenderer.render(scene);
+      if (scene.camera().needsRender()) {
+        scene.camera().didRender();
+        this._labelRenderer.render(scene);
+      }
     }
   };
 

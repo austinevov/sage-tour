@@ -141,23 +141,42 @@ export default class Scene {
     this.setVisibilityForPanorama(this._panoramaManager.activePanorama());
   };
 
-  public showHDTexture = (hdTexture: HTMLImageElement): void => {
-    this._spinner.show();
-    const texture: THREE.Texture = new THREE.Texture(hdTexture);
-    texture.anisotropy = this._anisotropy;
-    texture.minFilter = THREE.LinearFilter;
-    texture.magFilter = THREE.LinearMipMapLinearFilter;
+  public showHDTexture = (
+    renderer: THREE.WebGLRenderer,
+    hdTexture: WebGLTexture
+  ): void => {
+    // const forceTextureInitialization = (function() {
+    //   const material = new THREE.MeshBasicMaterial();
+    //   const geometry = new THREE.SphereGeometry();
+    //   const scene = new THREE.Scene();
+    //   scene.add(new THREE.Mesh(geometry, material));
+    //   const camera = new THREE.Camera();
 
+    //   return function forceTextureInitialization(texture) {
+    //     material.map = texture;
+    //     renderer.render(scene, camera);
+    //   };
+    // })();
+
+    const texture = new THREE.Texture();
+    //forceTextureInitialization(texture);
+    renderer.setTexture2D(texture, 0);
+    const texProps = renderer.properties.get(texture);
+    texProps.__webglTexture = hdTexture;
+
+    // this._spinner.show();
+    // const texture: THREE.Texture = new THREE.Texture(hdTexture);
+    // texture.anisotropy = this._anisotropy;
+    // texture.minFilter = THREE.LinearFilter;
+    // texture.magFilter = THREE.LinearMipMapLinearFilter;
     (this._mesh.material as any).map = texture;
-    (this._mesh.material as any).map.needsUpdate = true;
-    (this._mesh.material as any).needsUpdate = true;
-
+    //  (this._mesh.material as any).map.needsUpdate = true;
+    //(this._mesh.material as any).needsUpdate = true;
     this._mesh.visible = true;
     this._isShowingHD = true;
-
-    setTimeout(() => {
-      this._spinner.hide();
-    }, 1000);
+    // setTimeout(() => {
+    //   this._spinner.hide();
+    // }, 1000);
   };
 
   public hideHDTexture = (): void => {

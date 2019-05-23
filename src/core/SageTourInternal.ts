@@ -23,12 +23,11 @@ import DisplayBar from './DisplayBar';
 import Spinner from './Spinner';
 import { SageTourOpts } from './SageTour';
 
-
 const AcceptedEvents = [
   Event.ROTATION,
   Event.ZOOM,
   Event.WAYPOINT_CLICKED,
-  Event.CHANGE_FLOOR, 
+  Event.CHANGE_FLOOR,
   Event.CONTEXT_LOST
 ];
 
@@ -37,6 +36,7 @@ export let FORCE_LD = false;
 export default class SageTourInternal {
   private _container: HTMLDivElement;
   private _canvas: HTMLCanvasElement;
+  private _writeCanvas: HTMLCanvasElement;
   private _scene: Scene;
   private _sceneRenderer: SceneRenderer;
   private _originTime: number;
@@ -67,9 +67,22 @@ export default class SageTourInternal {
     this._container.style.position = 'relative';
     this._canvas = document.createElement('canvas');
     this._canvas.setAttribute('class', 'sage-tour--canvas');
+    this._writeCanvas = document.createElement('canvas');
+    this._writeCanvas.setAttribute('class', 'sage-tour--write-canvas');
+    this._writeCanvas.setAttribute('id', 'texture-splitter');
+    this._writeCanvas.style.width = '512px';
+    this._writeCanvas.style.height = '512px';
+    this._writeCanvas.width = 512;
+    this._writeCanvas.height = 512;
+    this._writeCanvas.style.opacity = '0';
 
-    this._canvas.addEventListener('webglcontextlost', this.onContextLost, false);
+    this._canvas.addEventListener(
+      'webglcontextlost',
+      this.onContextLost,
+      false
+    );
     this._container.appendChild(this._canvas);
+    this._container.appendChild(this._writeCanvas);
     this._labelContainer = new LabelContainer(
       this._container,
       panoramaGraph.map(p => p.id)
@@ -182,7 +195,7 @@ export default class SageTourInternal {
     while (this._container.firstChild) {
       this._container.removeChild(this._container.firstChild);
     }
-  }
+  };
 
   public on = (
     type:
@@ -264,7 +277,7 @@ export default class SageTourInternal {
     if (this._hooks[Event.CONTEXT_LOST]) {
       this._hooks[Event.CONTEXT_LOST](undefined);
     }
-  }
+  };
 
   private onZoom = (deltaFov: number): void => {
     if (this._enableControls) {

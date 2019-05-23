@@ -10,6 +10,7 @@ export default class Camera {
   private _fov: number;
   private _phi: number;
   private _theta: number;
+  private _needsRender: boolean;
 
   constructor(aspect: number) {
     this._fov = 90;
@@ -18,6 +19,7 @@ export default class Camera {
     this._target = new THREE.Vector3(0, 0, 0);
     this._phi = 0;
     this._theta = 0;
+    this._needsRender = true;
   }
 
   public camera = (): THREE.PerspectiveCamera => {
@@ -42,17 +44,28 @@ export default class Camera {
     return this._fov;
   };
 
-  public setTarget = (phi: number, theta: number): void => {
-    this._theta = theta;
-    this._phi = phi;
-    const x: number = SPHERE_RADIUS * Math.sin(phi) * Math.cos(theta);
-    const y: number = SPHERE_RADIUS * Math.cos(phi);
-    const z: number = SPHERE_RADIUS * Math.sin(phi) * Math.sin(theta);
+  public needsRender = (): boolean => {
+    return this._needsRender;
+  };
 
-    this._target = new THREE.Vector3(x, y, z);
-    this._camera.lookAt(this._target.clone().add(this._position));
-    this._camera.updateMatrixWorld(true);
-    this._camera.updateMatrix();
+  public didRender = (): void => {
+    this._needsRender = false;
+  };
+
+  public setTarget = (phi: number, theta: number): void => {
+    if (this._phi !== phi || this._theta !== theta) {
+      this._theta = theta;
+      this._phi = phi;
+      const x: number = SPHERE_RADIUS * Math.sin(phi) * Math.cos(theta);
+      const y: number = SPHERE_RADIUS * Math.cos(phi);
+      const z: number = SPHERE_RADIUS * Math.sin(phi) * Math.sin(theta);
+
+      this._target = new THREE.Vector3(x, y, z);
+      this._camera.lookAt(this._target.clone().add(this._position));
+      this._camera.updateMatrixWorld(true);
+      this._camera.updateMatrix();
+      this._needsRender = true;
+    }
   };
 
   public setFov = (fov: number): void => {
