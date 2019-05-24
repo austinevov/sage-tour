@@ -49,18 +49,23 @@ export default class Minimap {
   private _theta: number;
   private _slider: HTMLDivElement;
   private _isToggled: boolean;
+  private _name: string;
+  private _isHovering: boolean;
+
   constructor(
     parent: HTMLElement,
     floorData: FloorData,
-    panoramaAccessor: PanoramaAccessorFromId
+    panoramaAccessor: PanoramaAccessorFromId,
+    name: string
   ) {
     this._isToggled = true;
+    this._isHovering = false;
     this._panoramaAccessor = panoramaAccessor;
     this._activePanorama = undefined;
     const [xSpan, ySpan] = floorData.floorplanDimensions;
     this._fov = 90;
     this._theta = 0;
-
+    this._name = name;
     this._floorData = floorData;
     this._container = document.createElement('div');
     this._container.setAttribute('class', 'sage-tour--minimap');
@@ -80,7 +85,6 @@ export default class Minimap {
     this._mapSVG.setAttribute('class', 'map-svg');
     this._mapSVG.setAttribute('viewBox', `0 0 ${xSpan} ${ySpan}`);
     mapContainer.appendChild(this._mapSVG);
-    this._container.appendChild(mapContainer);
     this._mapSVG.appendChild(this._transform);
 
     this._mapSVGImage = document.createElementNS(
@@ -106,42 +110,44 @@ export default class Minimap {
     this._directionIndicator.setAttribute('opacity', '0.5');
     this._directionTransform.appendChild(this._directionIndicator);
 
-    const floorControlContainer: HTMLDivElement = document.createElement('div');
-    floorControlContainer.setAttribute('class', 'floor-control-container');
-    this._container.appendChild(floorControlContainer);
+    // const floorControlContainer: HTMLDivElement = document.createElement('div');
+    // floorControlContainer.setAttribute('class', 'floor-control-container');
+    // this._container.appendChild(floorControlContainer);
 
-    const downButton: HTMLImageElement = new Image();
-    const upButton: HTMLImageElement = new Image();
-    downButton.onclick = evt => {
-      evt.preventDefault();
-      evt.stopPropagation();
-      const event = new CustomEvent('change_floor', {
-        detail: { floor: this._floor - 1 }
-      });
+    // const downButton: HTMLImageElement = new Image();
+    // const upButton: HTMLImageElement = new Image();
+    // downButton.onclick = evt => {
+    //   evt.preventDefault();
+    //   evt.stopPropagation();
+    //   const event = new CustomEvent('change_floor', {
+    //     detail: { floor: this._floor - 1 }
+    //   });
 
-      document.dispatchEvent(event);
-    };
-    upButton.onclick = evt => {
-      evt.preventDefault();
-      evt.stopPropagation();
-      const event = new CustomEvent('change_floor', {
-        detail: { floor: this._floor + 1 }
-      });
+    //   document.dispatchEvent(event);
+    // };
+    // upButton.onclick = evt => {
+    //   evt.preventDefault();
+    //   evt.stopPropagation();
+    //   const event = new CustomEvent('change_floor', {
+    //     detail: { floor: this._floor + 1 }
+    //   });
 
-      document.dispatchEvent(event);
-    };
-    downButton.src = DOWN_ARROW_B64;
-    upButton.src = UP_ARROW_B64;
-    floorControlContainer.appendChild(upButton);
+    //   document.dispatchEvent(event);
+    // };
+    // downButton.src = DOWN_ARROW_B64;
+    // upButton.src = UP_ARROW_B64;
+    // floorControlContainer.appendChild(upButton);
 
-    this._floorSpan = document.createElement('span');
-    this._floorSpan.className = 'floor-number';
-    floorControlContainer.appendChild(this._floorSpan);
-    floorControlContainer.appendChild(downButton);
+    // this._floorSpan = document.createElement('span');
+    // this._floorSpan.className = 'floor-number';
+    // floorControlContainer.appendChild(this._floorSpan);
+    // floorControlContainer.appendChild(downButton);
 
     this._label = document.createElement('div');
     this._label.className = 'location-label';
+    this._label.innerText = this._name;
     this._container.appendChild(this._label);
+    this._container.appendChild(mapContainer);
 
     this._slider = document.createElement('div');
     const sliderIcon = document.createElement('img');
@@ -192,6 +198,16 @@ export default class Minimap {
     return point;
   };
 
+  private startHover = (key: string): void => {
+    const panorama = this._panoramaAccessor(Number(key));
+    this._label.innerText = panorama.name().replace('_', ' ');
+    this._isHovering = false;
+  };
+
+  private endHover = (key: string): void => {
+    this._label.innerText = this._name;
+  };
+
   private createPoints = (floor: number, active: Panorama): SVGElement[] => {
     return Object.keys(this._floorData.byFloor[floor].points)
       .map(pointKey => {
@@ -222,6 +238,14 @@ export default class Minimap {
           });
 
           document.dispatchEvent(event);
+        };
+
+        point.onmouseover = () => {
+          this.startHover(pointKey);
+        };
+
+        point.onmouseout = () => {
+          this.endHover(pointKey);
         };
 
         if (pointKey === '' + active.id()) {
@@ -264,13 +288,13 @@ export default class Minimap {
     this.setPoints(this._floor, this._activePanorama);
 
     this.updateDirectionIndicator();
-    this._floorSpan.innerText = `${this._floor}`;
+    // this._floorSpan.innerText = `${this._floor}`;
   };
 
   public setPanorama = (panorama: Panorama): void => {
     this._activePanorama = panorama;
     const floor: number = this.getFloorFromPanorama(panorama);
-    this._label.innerText = panorama.name().replace('_', ' ');
+    //this._label.innerText = panorama.name().replace('_', ' ');
     this.setFloor(floor);
   };
 

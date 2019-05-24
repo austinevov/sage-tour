@@ -7,6 +7,7 @@ import { TransitionEvent } from '../types/index';
 import { TRANSITION } from '../../constants/events';
 import clamp from '../../utils/clamp';
 import Minimap from '../Minimap';
+import DisplayBar from '../DisplayBar';
 
 export const MIN_FOV = 10;
 export const MAX_FOV = 150;
@@ -19,6 +20,7 @@ export default class TourController {
   private _isPanoramaDirty: boolean;
   private _targetPanoramaId: number;
   private _minimap: Minimap;
+  private _displayBar: DisplayBar;
 
   constructor() {
     this._phi = Math.PI / 2;
@@ -47,6 +49,10 @@ export default class TourController {
 
   public setMinimap = (minimap: Minimap): void => {
     this._minimap = minimap;
+  };
+
+  public setDisplayBar = (displayBar: DisplayBar): void => {
+    this._displayBar = displayBar;
   };
 
   public setTheta = (theta: number): void => {
@@ -102,8 +108,14 @@ export default class TourController {
     if (this._minimap) {
       this._minimap.setPanorama(destination);
       this._minimap.updateDirectionIndicator(this.theta(), this.fov());
+      if (this._displayBar) {
+        this._displayBar.setPanorama(destination);
+      }
       if (source.floor() !== destination.floor()) {
         this._minimap.setFloor(destination.floor());
+        if (this._displayBar) {
+          this._displayBar.setFloor(destination.floor());
+        }
       }
     }
   };

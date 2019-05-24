@@ -90,8 +90,8 @@ export default class SageTourInternal {
     this._spinner = new Spinner(this._container);
     this._displayBar = new DisplayBar(
       this._container,
-      name,
       this.onZoom,
+      this.onFloorChange,
       toggle => {
         if (toggle) {
           this._container.requestFullscreen();
@@ -172,11 +172,16 @@ export default class SageTourInternal {
       this._minimap = new Minimap(
         this._container,
         floorData,
-        this.panoramaById
+        this.panoramaById,
+        this._name
       );
       this._minimap.setPanorama(this.activePanorama());
       this._minimap.updateDirectionIndicator();
       this._tourController.setMinimap(this._minimap);
+      if (this._displayBar) {
+        this._displayBar.setPanorama(this.activePanorama());
+        this._tourController.setDisplayBar(this._displayBar);
+      }
     };
 
     if (this._initialized) {
@@ -334,7 +339,12 @@ export default class SageTourInternal {
   };
 
   public setFloor = (floor: number): void => {
-    this._minimap.setFloor(floor);
+    if (this._minimap) {
+      this._minimap.setFloor(floor);
+    }
+    if (this._displayBar) {
+      this._displayBar.setFloor(floor);
+    }
   };
 
   private onWindowResize = (): void => {

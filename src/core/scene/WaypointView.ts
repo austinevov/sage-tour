@@ -40,7 +40,7 @@ export default class WaypointView {
     this.label = label;
     this.visible = false;
 
-    let color = new THREE.Vector3(50, 54, 57);
+    let color = new THREE.Vector3(128, 128, 128);
     if (id % 2 === 0) {
       //      color = new THREE.Vector3(61, 95, 126);
     }
