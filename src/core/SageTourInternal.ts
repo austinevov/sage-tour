@@ -141,7 +141,8 @@ export default class SageTourInternal {
       imagePathRoot,
       this._canvas,
       this._sceneRenderer.getAnisotropy(),
-      this._spinner
+      this._spinner,
+      FORCE_LD
     );
 
     document.addEventListener(LOAD, () => {
