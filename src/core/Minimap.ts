@@ -209,52 +209,55 @@ export default class Minimap {
   };
 
   private createPoints = (floor: number, active: Panorama): SVGElement[] => {
-    return Object.keys(this._floorData.byFloor[floor].points)
-      .map(pointKey => {
-        const x = this._floorData.byFloor[floor].points[pointKey]
-          .floorPosition[0];
-        const y = this._floorData.byFloor[floor].points[pointKey]
-          .floorPosition[1];
+    return (
+      Object.keys(this._floorData.byFloor[floor].points)
+        .map(pointKey => {
+          const x = this._floorData.byFloor[floor].points[pointKey]
+            .floorPosition[0];
+          const y = this._floorData.byFloor[floor].points[pointKey]
+            .floorPosition[1];
 
-        const r = '2.5%';
+          const r = '2.5%';
 
-        const point: SVGElement = this.createPoint();
-        point.setAttribute('cx', '' + x);
-        point.setAttribute('cy', '' + y);
-        point.setAttribute('r', '' + r);
+          const point: SVGElement = this.createPoint();
+          point.setAttribute('cx', '' + x);
+          point.setAttribute('cy', '' + y);
+          point.setAttribute('r', '' + r);
 
-        const shadowPoint: SVGElement = this.createPoint();
-        shadowPoint.setAttribute('class', 'shadow-point');
-        shadowPoint.setAttribute('cx', '' + x);
-        shadowPoint.setAttribute('cy', '' + y);
-        shadowPoint.setAttribute('r', '' + '3%');
+          const shadowPoint: SVGElement = this.createPoint();
+          shadowPoint.setAttribute('class', 'shadow-point');
+          shadowPoint.setAttribute('cx', '' + x);
+          shadowPoint.setAttribute('cy', '' + y);
+          shadowPoint.setAttribute('r', '' + '3%');
 
-        point.onclick = evt => {
-          evt.preventDefault();
-          evt.stopPropagation();
+          point.onclick = evt => {
+            evt.preventDefault();
+            evt.stopPropagation();
 
-          const event = new CustomEvent('waypoint_clicked', {
-            detail: { panorama: this._panoramaAccessor(parseInt(pointKey)) }
-          });
+            const event = new CustomEvent('waypoint_clicked', {
+              detail: { panorama: this._panoramaAccessor(parseInt(pointKey)) }
+            });
 
-          document.dispatchEvent(event);
-        };
+            document.dispatchEvent(event);
+          };
 
-        point.onmouseover = () => {
-          this.startHover(pointKey);
-        };
+          point.onmouseover = () => {
+            this.startHover(pointKey);
+          };
 
-        point.onmouseout = () => {
-          this.endHover(pointKey);
-        };
+          point.onmouseout = () => {
+            this.endHover(pointKey);
+          };
 
-        if (pointKey === '' + active.id()) {
-          point.setAttribute('class', 'panorama-point active');
-        }
+          if (pointKey === '' + active.id()) {
+            point.setAttribute('class', 'panorama-point active');
+          }
 
-        return [point];
-      })
-      .flat();
+          return [point];
+        })
+        //@ts-ignore
+        .flat()
+    );
   };
 
   private removePoints = (): void => {

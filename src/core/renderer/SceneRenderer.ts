@@ -141,7 +141,7 @@ export default class SceneRenderer {
   };
 
   public resize = (width: number, height: number) => {
-    const scale = 1.3;
+    const scale = 2;
     this._renderer.setSize(width * scale, height * scale);
 
     this._renderer.domElement.style.width = `${width}px`;

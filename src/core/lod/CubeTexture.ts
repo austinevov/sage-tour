@@ -14,6 +14,15 @@ export const FaceTypes: number[] = [
   WebGLRenderingContext.TEXTURE_CUBE_MAP_NEGATIVE_Z
 ];
 
+const LeafOrder = {
+  px: 'px',
+  nx: 'nx',
+  py: 'py',
+  ny: 'ny',
+  pz: 'pz',
+  nz: 'nz'
+};
+
 export default class CubeTexture {
   private px: CubeFace;
   private py: CubeFace;
@@ -42,12 +51,12 @@ export default class CubeTexture {
 
     const pf: PathFinder = (ordinal, lod) => `${ordinal}-${lod}-${id}`;
     if (lod === 0) {
-      this.px = new CubeFaceLeaf(0, 512, 'px', lod, pf);
-      this.py = new CubeFaceLeaf(0, 512, 'py', lod, pf);
-      this.pz = new CubeFaceLeaf(0, 512, 'pz', lod, pf);
-      this.nx = new CubeFaceLeaf(0, 512, 'nx', lod, pf);
-      this.ny = new CubeFaceLeaf(0, 512, 'ny', lod, pf);
-      this.nz = new CubeFaceLeaf(0, 512, 'nz', lod, pf);
+      this.px = new CubeFaceLeaf(0, 512, LeafOrder['px'], lod, pf);
+      this.py = new CubeFaceLeaf(0, 512, LeafOrder['py'], lod, pf);
+      this.pz = new CubeFaceLeaf(0, 512, LeafOrder['pz'], lod, pf);
+      this.nx = new CubeFaceLeaf(0, 512, LeafOrder['nx'], lod, pf);
+      this.ny = new CubeFaceLeaf(0, 512, LeafOrder['ny'], lod, pf);
+      this.nz = new CubeFaceLeaf(0, 512, LeafOrder['nz'], lod, pf);
     } else if (lod === 1) {
       //base ordinal
       //face
@@ -55,19 +64,115 @@ export default class CubeTexture {
       //lod
       //pathfinder
       //resolution
-      this.px = new CubeFaceNodeSplitter(lod, 0, 'px', 4, 512, pf, 1024);
-      this.py = new CubeFaceNodeSplitter(lod, 0, 'py', 4, 512, pf, 1024);
-      this.pz = new CubeFaceNodeSplitter(lod, 0, 'pz', 4, 512, pf, 1024);
-      this.nx = new CubeFaceNodeSplitter(lod, 0, 'nx', 4, 512, pf, 1024);
-      this.ny = new CubeFaceNodeSplitter(lod, 0, 'ny', 4, 512, pf, 1024);
-      this.nz = new CubeFaceNodeSplitter(lod, 0, 'nz', 4, 512, pf, 1024);
+      this.px = new CubeFaceNodeSplitter(
+        lod,
+        0,
+        LeafOrder['px'],
+        4,
+        512,
+        pf,
+        1024
+      );
+      this.py = new CubeFaceNodeSplitter(
+        lod,
+        0,
+        LeafOrder['py'],
+        4,
+        512,
+        pf,
+        1024
+      );
+      this.pz = new CubeFaceNodeSplitter(
+        lod,
+        0,
+        LeafOrder['pz'],
+        4,
+        512,
+        pf,
+        1024
+      );
+      this.nx = new CubeFaceNodeSplitter(
+        lod,
+        0,
+        LeafOrder['nx'],
+        4,
+        512,
+        pf,
+        1024
+      );
+      this.ny = new CubeFaceNodeSplitter(
+        lod,
+        0,
+        LeafOrder['ny'],
+        4,
+        512,
+        pf,
+        1024
+      );
+      this.nz = new CubeFaceNodeSplitter(
+        lod,
+        0,
+        LeafOrder['nz'],
+        4,
+        512,
+        pf,
+        1024
+      );
     } else if (lod === 2) {
-      this.px = new CubeFaceNodeSplitter(lod, 0, 'px', 4, 1024, pf, 2048);
-      this.py = new CubeFaceNodeSplitter(lod, 0, 'py', 4, 1024, pf, 2048);
-      this.pz = new CubeFaceNodeSplitter(lod, 0, 'pz', 4, 1024, pf, 2048);
-      this.nx = new CubeFaceNodeSplitter(lod, 0, 'nx', 4, 1024, pf, 2048);
-      this.ny = new CubeFaceNodeSplitter(lod, 0, 'ny', 4, 1024, pf, 2048);
-      this.nz = new CubeFaceNodeSplitter(lod, 0, 'nz', 4, 1024, pf, 2048);
+      this.px = new CubeFaceNodeSplitter(
+        lod,
+        0,
+        LeafOrder['px'],
+        4,
+        1024,
+        pf,
+        2048
+      );
+      this.py = new CubeFaceNodeSplitter(
+        lod,
+        0,
+        LeafOrder['py'],
+        4,
+        1024,
+        pf,
+        2048
+      );
+      this.pz = new CubeFaceNodeSplitter(
+        lod,
+        0,
+        LeafOrder['pz'],
+        4,
+        1024,
+        pf,
+        2048
+      );
+      this.nx = new CubeFaceNodeSplitter(
+        lod,
+        0,
+        LeafOrder['nx'],
+        4,
+        1024,
+        pf,
+        2048
+      );
+      this.ny = new CubeFaceNodeSplitter(
+        lod,
+        0,
+        LeafOrder['ny'],
+        4,
+        1024,
+        pf,
+        2048
+      );
+      this.nz = new CubeFaceNodeSplitter(
+        lod,
+        0,
+        LeafOrder['nz'],
+        4,
+        1024,
+        pf,
+        2048
+      );
     }
   }
 
