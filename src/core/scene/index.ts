@@ -87,6 +87,7 @@ export default class Scene {
       side: THREE.DoubleSide
     });
     this._mesh = new THREE.Mesh(geometry, material);
+    this._mesh.rotation.y = Math.PI / 2;
     this._mesh.visible = false;
 
     this._scene.add(this._mesh);
